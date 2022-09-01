@@ -1,5 +1,5 @@
 /.idea
 /rootfs
-/venv
+/.venv
 *.pyc
 __pycache__
