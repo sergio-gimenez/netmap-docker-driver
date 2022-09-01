@@ -1,8 +1,10 @@
 {
-	"description": "pyveth - veth network driver in Python",
-	"documentation": "https://github.com/jacekkow/docker-plugin-pyveth",
+	"description": "netmap-docker-driver - veth network driver for netmap-based networks in Python",
+	"documentation": "https://github.com/sergio-gimeenz/netmap-docker-driver",
 	"workdir": "/usr/src/app",
-	"entrypoint": ["./run.py"],
+	"entrypoint": [
+		"./run.py"
+	],
 	"env": [
 		{
 			"name": "ENVIRONMENT",
@@ -13,12 +15,16 @@
 			"value": "/usr/src/app"
 		}
 	],
-	"interface" : {
-		"types": ["docker.networkdriver/1.0"],
-		"socket": "pyveth.sock"
+	"interface": {
+		"types": [
+			"docker.networkdriver/1.0"
+		],
+		"socket": "netmap-docker-driver.sock"
 	},
 	"linux": {
-		"capabilities": ["CAP_NET_ADMIN"]
+		"capabilities": [
+			"CAP_NET_ADMIN"
+		]
 	},
 	"network": {
 		"type": "host"
