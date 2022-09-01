@@ -7,7 +7,7 @@ import docker_plugin_api.Plugin
 import flask
 import waitress
 
-app = flask.Flask('pyveth')
+app = flask.Flask('valedocker')
 app.logger.setLevel(logging.DEBUG)
 
 app.register_blueprint(docker_plugin_api.Plugin.app)
@@ -20,4 +20,4 @@ if __name__ == '__main__':
 	if os.environ.get('ENVIRONMENT', 'dev') == 'dev':
 		app.run(debug=True)
 	else:
-		waitress.serve(app, unix_socket='/run/docker/plugins/pyveth.sock', threads=1)
+		waitress.serve(app, unix_socket='/run/docker/plugins/valedocker.sock', threads=1)
