@@ -1,6 +1,6 @@
 {
-	"description": "netmap-docker-driver - veth network driver for netmap-based networks in Python",
-	"documentation": "https://github.com/sergio-gimeenz/netmap-docker-driver",
+	"description": "valedocker - veth network driver for netmap-based networks in Python",
+	"documentation": "https://github.com/sergio-gimeenz/valedocker",
 	"workdir": "/usr/src/app",
 	"entrypoint": [
 		"./run.py"
@@ -19,11 +19,11 @@
 		"types": [
 			"docker.networkdriver/1.0"
 		],
-		"socket": "netmap-docker-driver.sock"
+		"socket": "valedocker.sock"
 	},
 	"linux": {
 		"capabilities": [
-			"CAP_NET_ADMIN"
+			"CAP_SYS_ADMIN"
 		]
 	},
 	"network": {

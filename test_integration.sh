@@ -2,7 +2,7 @@
 
 set -e
 
-NAME=${NAME:-sergiogimenez/netmap-docker-driver}
+NAME=${NAME:-sergiogimenez/valedocker}
 VERSION=${VERSION:-latest}
 
 PLUGIN="${NAME}:${VERSION}"
