@@ -9,4 +9,4 @@ __pycache__
 /package.sh
 /rootfs
 /test*
-/venv
+/.venv
