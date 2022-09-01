@@ -23,5 +23,5 @@ jobs:
           export VERSIONS
           ./package.sh
           for VERSION in ${VERSIONS}; do
-            docker plugin push "jacekkow/pyveth:${VERSION}"
+            docker plugin push "sergiogimenez/netmap-docker-driver:${VERSION}"
           done

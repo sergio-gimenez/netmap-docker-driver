@@ -2,7 +2,7 @@
 
 set -x
 
-NAME=${NAME:-jacekkow/pyveth}
+NAME=${NAME:-sergiogimenez/netmap-docker-driver}
 VERSIONS=${VERSIONS:-latest}
 
 DIR=$(dirname "$0")
