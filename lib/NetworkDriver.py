@@ -1,5 +1,6 @@
 import ipaddress
 import random
+import subprocess
 
 import flask
 import pyroute2
@@ -7,11 +8,38 @@ from docker_plugin_api.NetworkDriverEntities import *
 from docker_plugin_api.Plugin import Blueprint, InputValidationException
 
 from .NetworkDriverData import *
+import logger
+log = logger.get_logger(__name__)
 
 app = Blueprint('NetworkDriver', __name__)
 
 
-def genid(size=8, chars='0123456789abcdef'):
+def get_vale_name(network):
+    return "vale{}".format(network.NetworkID[0:3])
+
+
+def attach_port_to_vale(vale_name, port_name):
+    # type(str)
+    """
+    Attach a previously created VALE port to a VALE switch
+    """
+    try:
+        log.debug("Attaching port {} to {}".format(port_name, vale_name))
+        log.info("Invoking vale-ctl attach {}:{}".format(vale_name, port_name))
+        # subprocess.Popen(
+        #     ["/usr/local/bin/vale-ctl", "-a", "{}:{}".format(vale_name, port_name)])
+        import os
+        cmd = 'vale-ctl -a {}:{}'.format(vale_name, port_name)
+        os.system(cmd)
+
+    except OSError as e:
+        err_msg = "Failed to attach port {} to {} --> {}".format(
+            port_name, vale_name, e)
+        log.exception(err_msg)
+        raise OSError(err_msg)
+
+
+def genid(size=3, chars='0123456789'):
     return ''.join([random.choice(chars) for _ in range(size)])
 
 
@@ -27,10 +55,12 @@ def create_interface(endpoint, network) -> str:
         ip.link('set', index=idx, state='up')
         if endpoint.Interface.Address:
             addr = ipaddress.ip_interface(endpoint.Interface.Address)
-            ip.addr('add', index=idx, address=addr.ip.compressed, mask=addr.network.prefixlen)
+            ip.addr('add', index=idx, address=addr.ip.compressed,
+                    mask=addr.network.prefixlen)
         if endpoint.Interface.AddressIPv6:
             addr = ipaddress.ip_interface(endpoint.Interface.AddressIPv6)
-            ip.addr('add', index=idx, address=addr.ip.compressed, mask=addr.network.prefixlen)
+            ip.addr('add', index=idx, address=addr.ip.compressed,
+                    mask=addr.network.prefixlen)
         endpoint.Interface.Name = ifname0
 
         idx = ip.link_lookup(ifname=ifname1)[0]
@@ -39,6 +69,9 @@ def create_interface(endpoint, network) -> str:
             id_parent = ip.link_lookup(ifname=network.Options['parent'])[0]
             print(ip.link("set", index=idx, master=id_parent))
         endpoint.Interface.Peer = ifname1
+
+    vale_name = get_vale_name(network)
+    attach_port_to_vale(vale_name, ifname1)
 
     return ifname0
 
@@ -77,7 +110,8 @@ def DeleteNetwork():
 @app.route('/NetworkDriver.CreateEndpoint', methods=['POST'])
 def CreateEndpoint():
     endpoint = EndpointCreateEntity(**flask.request.get_json(force=True))
-    endpoints['{}-{}'.format(endpoint.NetworkID, endpoint.EndpointID)] = endpoint
+    endpoints['{}-{}'.format(endpoint.NetworkID,
+                             endpoint.EndpointID)] = endpoint
     return {
         'Interface': {
         }
@@ -158,11 +192,13 @@ def DiscoverDelete():
 
 @app.route('/NetworkDriver.ProgramExternalConnectivity', methods=['POST'])
 def ProgramExternalConnectivity():
-    entity = ProgramExternalConnectivityEntity(**flask.request.get_json(force=True))
+    entity = ProgramExternalConnectivityEntity(
+        **flask.request.get_json(force=True))
     return {}
 
 
 @app.route('/NetworkDriver.RevokeExternalConnectivity', methods=['POST'])
 def RevokeExternalConnectivity():
-    entity = RevokeExternalConnectivityEntity(**flask.request.get_json(force=True))
+    entity = RevokeExternalConnectivityEntity(
+        **flask.request.get_json(force=True))
     return {}

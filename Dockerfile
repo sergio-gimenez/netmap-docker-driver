@@ -1,15 +1,15 @@
-FROM alpine
+FROM sergiogimenez/netmap-docker:latest
 
-RUN apk add python3 py3-pip
+RUN apt-get install python3
 RUN mkdir -p /run/docker/plugins /usr/src/app \
-	&& chown -R nobody:nobody /run/docker/plugins /usr/src/app
-USER nobody
+	&& chown -R root:root /run/docker/plugins /usr/src/app
+USER root
 ENV HOME=/usr/src/app
-WORKDIR /usr/src/app
+WORKDIR /usr/src/app	
 
-COPY --chown=nobody:nobody requirements.txt .
+COPY --chown=root:root requirements.txt .
 RUN pip3 install --user --no-cache-dir -r requirements.txt
 
-COPY --chown=nobody:nobody . .
+COPY --chown=root:root . .
 
 CMD [ "./run.py" ]
