@@ -8,8 +8,8 @@ services:
         volumes:
             - '/dev/netmap:/dev/netmap'
         image: sergiogimenez/netmap-docker:latest
-        command: pkt-gen -i eth0 -f rx
-        # command: tail -F anything
+        # command: pkt-gen -i eth0 -f rx
+        command: tail -F anything
 
     sender:
         container_name: 'txc'
@@ -19,11 +19,12 @@ services:
         volumes:
             - '/dev/netmap:/dev/netmap'
         image: sergiogimenez/netmap-docker:latest
-        command: pkt-gen -i eth0 -f tx
-        # command: tail -F anything
+        # command: pkt-gen -i eth0 -f tx
+        command: tail -F anything
         depends_on:
             - receiver
 
 networks:
     vale:
-        driver: vale_docker
+        # driver: vale_docker
+        driver: sergiogimenez/vale:latest

@@ -1,0 +1,41 @@
+{
+    "description": "vale - veth network driver in Python",
+    "documentation": "https://github.com/sergio-gimenez/netmap-docker-driver",
+    "workdir": "/usr/src/app",
+    "entrypoint": [
+        "./run.py"
+    ],
+    "env": [
+        {
+            "name": "ENVIRONMENT",
+            "value": "production"
+        },
+        {
+            "name": "HOME",
+            "value": "/usr/src/app"
+        }
+    ],
+    "interface": {
+        "types": [
+            "docker.networkdriver/1.0"
+        ],
+        "socket": "vale.sock"
+    },
+    "linux": {
+        "capabilities": [
+            "CAP_NET_ADMIN",
+            "CAP_SYS_ADMIN"
+        ],
+        "allowAllDevices": true,
+        "devices": [
+            {
+                "name": "netmap",
+                "description": "Netmap kernel module",
+                "path": "/dev/netmap"
+            }
+        ]
+    },
+    "network": {
+        "type": "host"
+    }
+}
