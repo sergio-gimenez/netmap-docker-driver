@@ -15,19 +15,17 @@ app = Blueprint('NetworkDriver', __name__)
 
 
 def get_vale_name(network):
+    print("Network ID: {}".format(network.NetworkID))
     return "vale{}".format(network.NetworkID[0:3])
 
 
 def attach_port_to_vale(vale_name, port_name):
-    # type(str)
     """
     Attach a previously created VALE port to a VALE switch
     """
     try:
-        log.debug("Attaching port {} to {}".format(port_name, vale_name))
-        log.info("Invoking vale-ctl attach {}:{}".format(vale_name, port_name))
-        # subprocess.Popen(
-        #     ["/usr/local/bin/vale-ctl", "-a", "{}:{}".format(vale_name, port_name)])
+        print("Attaching port {} to {}".format(port_name, vale_name))
+        print("Invoking vale-ctl attach {}:{}".format(vale_name, port_name))
         import os
         cmd = 'vale-ctl -a {}:{}'.format(vale_name, port_name)
         os.system(cmd)
@@ -35,7 +33,25 @@ def attach_port_to_vale(vale_name, port_name):
     except OSError as e:
         err_msg = "Failed to attach port {} to {} --> {}".format(
             port_name, vale_name, e)
-        log.exception(err_msg)
+        print(err_msg)
+        raise OSError(err_msg)
+
+
+def detach_port_from_vale(vale_name, port_name):
+    """
+    Detach a previously created VALE port from a VALE switch
+    """
+    try:
+        print("Detaching port {} from {}".format(port_name, vale_name))
+        print("Invoking vale-ctl detach {}:{}".format(vale_name, port_name))
+        import os
+        cmd = 'vale-ctl -d {}:{}'.format(vale_name, port_name)
+        os.system(cmd)
+
+    except OSError as e:
+        err_msg = "Failed to detach port {} from {} --> {}".format(
+            port_name, vale_name, e)
+        print(err_msg)
         raise OSError(err_msg)
 
 
@@ -76,6 +92,16 @@ def create_interface(endpoint, network) -> str:
     return ifname0
 
 
+def delete_interface(endpoint, network):
+    # TODO For some reason can't dettach veths attached to a vale switch. Open issue at: https://github.com/luigirizzo/netmap/issues/882
+    # vale_name = get_vale_name(network)
+    # detach_port_from_vale(vale_name, endpoint.Interface.Peer)
+
+    with pyroute2.IPRoute() as ip:
+        idx = ip.link_lookup(ifname=endpoint.Interface.Peer)[0]
+        ip.link('del', index=idx)
+
+
 @app.route('/NetworkDriver.GetCapabilities', methods=['POST'])
 def GetCapabilities():
     return {
@@ -95,6 +121,7 @@ def CreateNetwork():
         pass
     networks[network.NetworkID] = network
     networks_sync()
+    print("CreateNetwork: slcie_id = {}".format(network.NetworkID))
     return {}
 
 
@@ -138,10 +165,12 @@ def DeleteEndpoint():
 
 @app.route('/NetworkDriver.Join', methods=['POST'])
 def Join():
+    print("HI")
     join = JoinEntity(**flask.request.get_json(force=True))
     network = networks[join.NetworkID]
     endpoint = endpoints['{}-{}'.format(join.NetworkID, join.EndpointID)]
 
+    print("Joining endpoint to network {}".format(network.NetworkID))
     interface = create_interface(endpoint, network)
 
     gw4 = None
@@ -175,6 +204,9 @@ def Join():
 @app.route('/NetworkDriver.Leave', methods=['POST'])
 def Leave():
     leave = LeaveEntity(**flask.request.get_json(force=True))
+    endpoint = endpoints['{}-{}'.format(leave.NetworkID, leave.EndpointID)]
+    network = networks[leave.NetworkID]
+    delete_interface(endpoint, network)
     return {}
 
 
