@@ -14,10 +14,38 @@ An important take here is to know that if netmap is using the `veth` patched dri
 
 ## Installation
 
+### "Debug" Mode
+
+While developing the plugin, I find it useaful to run it as a normal docker container.
+
+To do so, we need first to make sure Docker daeamon can see the container as a plugin (as said in [docs](https://docs.docker.com/engine/extend/plugin_api/#plugin-discovery)).
+
+To do so, we just need to run the following:
+
 ```bash
 sudo cp vale_docker.json /etc/docker/plugins
-docker-compose up
 ```
+
+Then, we can build the container and run it using docker-compose:
+
+```bash
+docker-compose -f rina-docker-plugin.yml up
+```
+
+### "Production" Mode
+
+Plugin is packaged as [Docker Engine-managed plugin](https://docs.docker.com/engine/extend/).
+Check out [plugin page on Docker Hub](https://hub.docker.com/p/jacekkow/pyveth).
+
+To install it simply run:
+
+```bash
+docker plugin install sergiogimenez/vale:latest
+```
+
+In order to test this module in development environment, you can build it by following [Docker Engine documentation](https://docs.docker.com/engine/extend/#developing-a-plugin).
+
+You can also use `package.sh` helper script which will perform all the steps (including installation) automatically.
 
 ## Test
 
