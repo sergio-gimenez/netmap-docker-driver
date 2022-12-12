@@ -26,6 +26,7 @@ def attach_port_to_vale(vale_name, port_name):
     try:
         print("Attaching port {} to {}".format(port_name, vale_name))
         print("Invoking vale-ctl attach {}:{}".format(vale_name, port_name))
+
         import os
         cmd = 'vale-ctl -a {}:{}'.format(vale_name, port_name)
         os.system(cmd)
