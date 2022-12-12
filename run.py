@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import lib.NetworkDriver
-import logging
+# inport logging
 import os
 
 import docker_plugin_api.Plugin
@@ -9,10 +9,10 @@ import flask
 import waitress
 import subprocess
 
-subprocess.Popen(["modprobe", "netmap"])
+# subprocess.Popen(["modprobe", "netmap"])
 
 app = flask.Flask('vale')
-app.logger.setLevel(logging.DEBUG)
+# app.logger.setLevel(logging.DEBUG)
 
 app.register_blueprint(docker_plugin_api.Plugin.app)
 

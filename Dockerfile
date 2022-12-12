@@ -12,4 +12,6 @@ RUN pip3 install --user --no-cache-dir -r requirements.txt
 
 COPY --chown=root:root . .
 
-CMD [ "./run.py" ]
+ENV PYTHONUNBUFFERED=0
+
+CMD [ "python3", "-u", "./run.py" ]
