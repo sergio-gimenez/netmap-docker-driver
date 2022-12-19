@@ -26,5 +26,5 @@ services:
 
 networks:
     vale:
-        # driver: vale_docker
-        driver: sergiogimenez/vale:latest
+        driver: vale_docker
+        # driver: sergiogimenez/vale:latest

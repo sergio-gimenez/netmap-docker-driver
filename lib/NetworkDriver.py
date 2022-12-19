@@ -15,8 +15,9 @@ app = Blueprint('NetworkDriver', __name__)
 
 
 def get_vale_name(network):
-    print("Network ID: {}".format(network.NetworkID))
-    return "vale{}".format(network.NetworkID[0:3])
+    # print("Network ID: {}".format(network.NetworkID))
+    # return "vale{}".format(network.NetworkID[0:3])
+    return "vale5"
 
 
 def attach_port_to_vale(vale_name, port_name):
@@ -94,9 +95,8 @@ def create_interface(endpoint, network) -> str:
 
 
 def delete_interface(endpoint, network):
-    # TODO For some reason can't dettach veths attached to a vale switch. Open issue at: https://github.com/luigirizzo/netmap/issues/882
-    # vale_name = get_vale_name(network)
-    # detach_port_from_vale(vale_name, endpoint.Interface.Peer)
+    vale_name = get_vale_name(network)
+    detach_port_from_vale(vale_name, endpoint.Interface.Peer)
 
     with pyroute2.IPRoute() as ip:
         idx = ip.link_lookup(ifname=endpoint.Interface.Peer)[0]
@@ -122,7 +122,6 @@ def CreateNetwork():
         pass
     networks[network.NetworkID] = network
     networks_sync()
-    print("CreateNetwork: slcie_id = {}".format(network.NetworkID))
     return {}
 
 
@@ -161,12 +160,12 @@ def DeleteEndpoint():
     endpoint_id = '{}-{}'.format(entity.NetworkID, entity.EndpointID)
     if endpoint_id in endpoints:
         del endpoints['{}-{}'.format(entity.NetworkID, entity.EndpointID)]
+    # delete_interface(endpoints[endpoint_id], networks[entity.NetworkID])
     return {}
 
 
 @app.route('/NetworkDriver.Join', methods=['POST'])
 def Join():
-    print("HI")
     join = JoinEntity(**flask.request.get_json(force=True))
     network = networks[join.NetworkID]
     endpoint = endpoints['{}-{}'.format(join.NetworkID, join.EndpointID)]
