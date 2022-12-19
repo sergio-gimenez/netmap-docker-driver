@@ -17,7 +17,9 @@ app = Blueprint('NetworkDriver', __name__)
 def get_vale_name(network):
     # print("Network ID: {}".format(network.NetworkID))
     # return "vale{}".format(network.NetworkID[0:3])
-    return "vale5"
+    # return "vale5"
+    slice_id = network.Options['slice_id']
+    return "vale{}".format(slice_id)
 
 
 def attach_port_to_vale(vale_name, port_name):
@@ -83,9 +85,11 @@ def create_interface(endpoint, network) -> str:
 
         idx = ip.link_lookup(ifname=ifname1)[0]
         ip.link('set', index=idx, state='up')
-        if 'parent' in network.Options:
-            id_parent = ip.link_lookup(ifname=network.Options['parent'])[0]
-            print(ip.link("set", index=idx, master=id_parent))
+        if not 'slice_id' in network.Options:
+            raise InputValidationException(
+                "Missing slice_id in network options")
+        slice_id = network.Options['slice_id']
+        print("Setting slice_id {} on {}".format(slice_id, ifname1))
         endpoint.Interface.Peer = ifname1
 
     vale_name = get_vale_name(network)
@@ -95,6 +99,7 @@ def create_interface(endpoint, network) -> str:
 
 
 def delete_interface(endpoint, network):
+    print("Deleting interface {}".format(endpoint.Interface.Peer))
     vale_name = get_vale_name(network)
     detach_port_from_vale(vale_name, endpoint.Interface.Peer)
 
@@ -156,6 +161,7 @@ def EndpointOperInfo():
 
 @app.route('/NetworkDriver.DeleteEndpoint', methods=['POST'])
 def DeleteEndpoint():
+    print("DeleteEndpoint called")
     entity = EndpointDeleteEntity(**flask.request.get_json(force=True))
     endpoint_id = '{}-{}'.format(entity.NetworkID, entity.EndpointID)
     if endpoint_id in endpoints:
@@ -203,10 +209,11 @@ def Join():
 
 @app.route('/NetworkDriver.Leave', methods=['POST'])
 def Leave():
+    print("Leave called")
     leave = LeaveEntity(**flask.request.get_json(force=True))
     endpoint = endpoints['{}-{}'.format(leave.NetworkID, leave.EndpointID)]
     network = networks[leave.NetworkID]
-    delete_interface(endpoint, network)
+    # delete_interface(endpoint, network)
     return {}
 
 

@@ -1,0 +1,20 @@
+version: "3.3"
+services:
+  sender:
+    container_name: "txc"
+    privileged: true
+    networks:
+      - vale
+    volumes:
+      - "/dev/netmap:/dev/netmap"
+    image: sergiogimenez/netmap-docker:latest
+    # command: pkt-gen -i eth0 -f tx
+    command: tail -F anything
+    depends_on:
+      - receiver
+networks:
+  vale:
+    driver: vale_docker
+    # driver: sergiogimenez/vale:latest
+    driver_opts:
+      slice_id: 111
