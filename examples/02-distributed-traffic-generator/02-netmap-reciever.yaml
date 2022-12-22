@@ -1,17 +1,16 @@
 version: "3.3"
 services:
   sender:
-    container_name: "txc"
+    container_name: "rx_container"
     privileged: true
     networks:
       - vale
     volumes:
       - "/dev/netmap:/dev/netmap"
     image: sergiogimenez/netmap-docker:latest
-    # command: pkt-gen -i eth0 -f tx
-    command: tail -F anything
-    depends_on:
-      - receiver
+    command: pkt-gen -i eth0 -f rx
+    # command: tail -F anything
+
 networks:
   vale:
     driver: vale_docker
