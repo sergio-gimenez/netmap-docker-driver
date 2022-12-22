@@ -8,8 +8,6 @@ from docker_plugin_api.NetworkDriverEntities import *
 from docker_plugin_api.Plugin import Blueprint, InputValidationException
 
 from .NetworkDriverData import *
-import logger
-log = logger.get_logger(__name__)
 
 app = Blueprint('NetworkDriver', __name__)
 
